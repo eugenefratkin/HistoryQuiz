@@ -1,5 +1,6 @@
 import openai
 import os
+from PDFtoTEXT import pdf_image_to_text
 
 os.environ["OPENAI_API_KEY"] = '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'
 
@@ -102,6 +103,7 @@ def summarize_file():
     file_path = input("Please enter the path to the file you want to summarize: ")
     
     # Read the file content
+    #file_content = pdf_image_to_text(file_path)
     file_content = read_file(file_path)
     
     # Check if file reading was successful
