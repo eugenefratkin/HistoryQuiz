@@ -14,6 +14,49 @@ def read_file(file_path):
     except IOError:
         return 'Error reading the file.'
     
+    
+def split_into_paragraphs(large_text):
+    """
+    Splits a large text into logical paragraphs using GPT-3.5.
+    
+    Parameters:
+        large_text (str): A large text to be split into paragraphs.
+        
+    Returns:
+        list of str: A list containing the split paragraphs.
+    """
+    # This is a hypothetical approach and might need a lot of tuning and adjustment
+    # to work for specific use-cases.
+    
+    paragraphs = []
+    remaining_text = large_text
+    
+    while remaining_text:
+        # Truncate or otherwise preprocess the remaining_text to fit within API limits
+        # Note: You need to ensure that the text being sent to the API is under the token limit.
+        snippet = remaining_text[:4096]  # Example limit, adjust as per actual token count
+        
+        try:
+            # Make API call
+            response = openai.Completion.create(
+              engine="text-davinci-003",  # Use "davinci" or other available engines
+              prompt=f"Identify a logical paragraph: {snippet}",
+              max_tokens=100  # Adjust as needed
+            )
+            
+            # Extract and store response
+            paragraph = response.choices[0].text.strip()
+            paragraphs.append(paragraph)
+            
+            # Update remaining_text by removing the identified paragraph
+            # This is a simplified approach and might not work perfectly
+            remaining_text = remaining_text[len(paragraph):]
+        
+        except Exception as e:
+            print(f"Error processing text: {snippet}. Error: {str(e)}")
+            break
+    
+    return paragraphs
 
 def split_into_chunks(text, max_tokens=3000):
     """

@@ -1,5 +1,7 @@
 import pinecone
 import numpy as np
+from sentence_transformers import SentenceTransformer, util
+import torch
 
 # Initialize Pinecone
 pinecone.init(api_key="9e656193-e394-43af-8147-5dcc62a22ef2", environment="asia-southeast1-gcp-free")
@@ -10,6 +12,34 @@ print("Using Pinecone version: " + pinecone.__version__)
 # Create an index
 index_name = "history"
 index_dimention = 4
+
+def text_to_embedding(text):
+    """
+    Converts a text to a vector embedding using Sentence Transformers.
+    
+    Parameters:
+        text (str): The text to convert.
+        
+    Returns:
+        torch.Tensor: The vector embedding of the text.
+    """
+    # Load the model
+    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+    
+    # Generate the embedding
+    embedding = model.encode(text, convert_to_tensor=True)
+    
+    return embedding
+
+def store_embedding_in_pinecone(embedding, vector_id, index):
+    # Convert the embedding to a list
+    if isinstance(embedding, torch.Tensor):
+        embedding = embedding.cpu().numpy()
+    embedding_list = embedding.tolist()
+    
+    # Upsert the vector to Pinecone
+    index.upsert(vectors={vector_id: embedding_list})
+
 
 # This function creates a Pinecone index with the given name and dimension, using a single shard.
 def create_index(index_name, index_dimension):
