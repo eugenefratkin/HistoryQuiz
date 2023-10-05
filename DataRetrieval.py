@@ -1,4 +1,5 @@
 import pinecone
+import pymongo
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 import torch
@@ -12,6 +13,32 @@ print("Using Pinecone version: " + pinecone.__version__)
 # Create an index
 index_name = "history"
 index_dimention = 4
+
+def connect_to_documentdb():
+    # Connection details
+    username = "homework"
+    password = "fgu3mgh3dtg_her!EPF"
+    cluster_endpoint = "docdb-2023-10-04-23-49-54.cd2f6lgiqcr3.us-east-1.docdb.amazonaws.com"
+    port = 27017  # default MongoDB and DocumentDB port
+    
+    # Connection URI
+    connection_uri = f"mongodb://{username}:{password}@{cluster_endpoint}:{port}/?ssl=true&replicaSet=rs0&readpreference=primaryPreferred&retrywrites=false"
+    
+    # Connect to DocumentDB
+    client = pymongo.MongoClient(connection_uri, tlsCAFile='global-bundle.pem')
+    
+    # Use a database (or create it if it doesn't exist)
+    db = client['history']
+    
+    # Use a collection (or create it if it doesn't exist)
+    collection = db['history']
+    
+    # Insert a document into the collection
+    collection.insert_one({"key": "value"})
+    
+    # Retrieve and print all documents from the collection
+    for doc in collection.find():
+        print(doc)
 
 def text_to_embedding(text):
     """
@@ -67,6 +94,8 @@ results = index.query(queries=query_vector, top_k=2)
 
 # Display results
 print(results)
+
+connect_to_documentdb()
 
 # Delete the index
 #pinecone.deinit()
