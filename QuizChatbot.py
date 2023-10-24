@@ -157,7 +157,6 @@ def Summarize():
                 bullet_points = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
                 
                 print(f"processing chunk {chunk_count}")
-                chunk_count += 1
                 
                 # Append the bullet_text to the file called 'Summary.txt'
                 with open(directory + '/Summary.txt', 'a') as file:
@@ -169,6 +168,8 @@ def Summarize():
                 print(f"Error processing text chunk: {chunk}. Error: {str(e)}. Retrying in 5 seconds...")
                 retries += 1  # Increment the retries count
                 time.sleep(5)  # Wait for 5 seconds before retrying
+
+            chunk_count += 1
 
         if not success:
             print(f"Failed to process chunk {chunk} after {retries} retries.")
