@@ -127,7 +127,7 @@ def Test():
 
 def Answer(index, question):
     query_engine = index.as_query_engine(
-        similarity_top_k=17, 
+        similarity_top_k=8, 
         response_mode='refine',
         verbose=True)
     response = query_engine.query(question)
@@ -144,7 +144,7 @@ def Summarize():
             response = openai.Completion.create(
                 engine="text-davinci-003",  # Use "davinci" or other available engines
                 prompt=(
-                    f"{chunk}\n\nProvide bullet points of the main ideas and key facts:"
+                    f"{chunk}\n\nProvide bullet points of the main ideas and key facts. Only key facts no more than 5-7 points"
                 ),
                 max_tokens=3500  # Adjust as needed
             )
@@ -164,6 +164,41 @@ def Summarize():
     
     # Write the summary_text to a file called 'Summary'
     with open(directory + '/Summary.txt', 'w') as file:
+        file.write(summary_text)
+    
+    return all_bullet_points  # Return the concatenated list of all bullet points
+
+def Summarize_chat():
+    all_chunks_text = get_all_chunks_text(directory)
+    all_bullet_points = []  # Initialize an empty list to hold all bullet points
+
+    chunk_count = 1
+    for chunk in all_chunks_text:
+        try:
+            # Make API call
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": f"{chunk}\n\nProvide bullet points of the main ideas and key facts. Only key facts no more than 5-7 points"},
+                ]
+            )
+            # Extract and store response
+            bullet_points = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
+            
+            print(f"processing chunk {chunk_count}")
+            chunk_count+=1
+            # Extend the all_bullet_points list with the bullet points from this response
+            all_bullet_points.extend(bullet_points)
+
+        except Exception as e:
+            print(f"Error processing text chunk: {chunk}. Error: {str(e)}")
+
+    # Convert the list of all bullet points to a single string with one bullet point per line
+    summary_text = '\n'.join(all_bullet_points)
+    
+    # Write the summary_text to a file called 'Summary'
+    with open(directory + '/Summary-chat.txt', 'w') as file:
         file.write(summary_text)
     
     return all_bullet_points  # Return the concatenated list of all bullet points
@@ -190,7 +225,7 @@ def main():
         if choice == 'T':
             Test()
         elif choice == 'S':
-            Summarize()
+            Summarize_chat()
         elif choice == 'A':
             question = input("Enter your question: ")
             Answer(index, question)
