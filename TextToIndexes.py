@@ -5,10 +5,18 @@ from llama_index.vector_stores import PineconeVectorStore
 from llama_index.llms import OpenAI
 import json
 import pinecone
-import openai
+
+import keyring
 import os
 
-os.environ["OPENAI_API_KEY"] = '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'
+# Get the API key from the system's keyring
+api_key = keyring.get_password("openai", "api_key")
+
+# Check if the API key was retrieved successfully
+if api_key:
+    os.environ["OPENAI_API_KEY"] = api_key
+else:
+    print("Failed to retrieve the API key.")
 
 # Define the chunk and overlap sizes
 CHUNK_SIZE = 500  # Adjust this value to your needs
