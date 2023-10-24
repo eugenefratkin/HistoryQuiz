@@ -6,6 +6,7 @@ import random
 import os
 import json
 import openai
+import time
 import keyring
 from llama_index import (
     VectorStoreIndex,
@@ -135,38 +136,49 @@ def Answer(index, question):
 
 def Summarize():
     all_chunks_text = get_all_chunks_text(directory)
-    all_bullet_points = []  # Initialize an empty list to hold all bullet points
-
     chunk_count = 1
+    import time
+
     for chunk in all_chunks_text:
-        try:
-            # Make API call
-            response = openai.Completion.create(
-                engine="text-davinci-003",  # Use "davinci" or other available engines
-                prompt=(
-                    f"{chunk}\n\nProvide bullet points of the main ideas and key facts. Only key facts no more than 5-7 points"
-                ),
-                max_tokens=3500  # Adjust as needed
-            )
-            # Extract and store response
-            bullet_points = response.choices[0].text.strip().split('\n')  # Assume each bullet point is on a new line
-            
-            print(f"processing chunk {chunk_count}")
-            chunk_count+=1
-            # Extend the all_bullet_points list with the bullet points from this response
-            all_bullet_points.extend(bullet_points)
+        success = False  # Variable to track if processing the chunk succeeded
+        retries = 0  # Variable to track the number of retries
 
-        except Exception as e:
-            print(f"Error processing text chunk: {chunk}. Error: {str(e)}")
+        while not success and retries < 3:  # Assuming a maximum of 3 retries per chunk
+            try:
+                # Make API call
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": f"{chunk}\n\nProvide bullet points of the main ideas and key facts. Only key facts no more than 5-7 points"},
+                    ]
+                )
+                # Extract and store response
+                bullet_points = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
+                
+                print(f"processing chunk {chunk_count}")
+                chunk_count += 1
+                
+                # Append the bullet_text to the file called 'Summary.txt'
+                with open(directory + '/Summary.txt', 'a') as file:
+                    file.write(bullet_points + '\n')  # Add a newline character at the end for separation
+                
+                success = True  # Set success to True if the above code executes without throwing an exception
 
-    # Convert the list of all bullet points to a single string with one bullet point per line
-    summary_text = '\n'.join(all_bullet_points)
-    
-    # Write the summary_text to a file called 'Summary'
-    with open(directory + '/Summary.txt', 'w') as file:
-        file.write(summary_text)
+            except Exception as e:
+                print(f"Error processing text chunk: {chunk}. Error: {str(e)}. Retrying in 5 seconds...")
+                retries += 1  # Increment the retries count
+                time.sleep(5)  # Wait for 5 seconds before retrying
+
+        if not success:
+            print(f"Failed to process chunk {chunk} after {retries} retries.")
+
+    # Optionally, you can still return all_bullet_points if needed
+    with open(directory + '/Summary.txt', 'r') as file:
+        all_bullet_points = file.read().splitlines()
     
     return all_bullet_points  # Return the concatenated list of all bullet points
+
 
 def Summarize_chat():
     all_chunks_text = get_all_chunks_text(directory)
@@ -225,7 +237,7 @@ def main():
         if choice == 'T':
             Test()
         elif choice == 'S':
-            Summarize_chat()
+            Summarize()
         elif choice == 'A':
             question = input("Enter your question: ")
             Answer(index, question)
