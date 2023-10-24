@@ -6,6 +6,7 @@ import random
 import os
 import json
 import openai
+import keyring
 from llama_index import (
     VectorStoreIndex,
 )
@@ -16,7 +17,18 @@ index_name = "history-chunks"
 total_vector_count = 0
 directory = "/Users/efratkin/Code Projects/HistoryQuiz/output"
 
-os.environ["OPENAI_API_KEY"] = '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'
+import keyring
+import os
+
+# Get the API key from the system's keyring
+api_key = keyring.get_password("openai", "api_key")
+
+# Check if the API key was retrieved successfully
+if api_key:
+    os.environ["OPENAI_API_KEY"] = api_key
+else:
+    print("Failed to retrieve the API key.")
+
 pinecone.init(api_key="9e656193-e394-43af-8147-5dcc62a22ef2", environment="asia-southeast1-gcp-free")
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
@@ -38,6 +50,10 @@ def get_random_chunk_text():
     # Extract and return the text of the randomly selected node
     return random_node['text']
 
+def check_answer(user_answer, correct_answer):
+    # Implement your answer checking logic here
+    return user_answer.lower() == correct_answer.lower()
+
 
 def Test():
     text = get_random_chunk_text()
@@ -53,12 +69,38 @@ def Test():
         )
                 # Extract and store response
         question_answer = response.choices[0].text.strip()
-        
+
     except Exception as e:
         print(f"Error processing text: {text}. Error: {str(e)}")
         question_answer.append(None)
 
-    print(question_answer)
+    # Parse the question and answer from the API response
+    if question_answer:
+        try:
+            qa_json = json.loads(question_answer)
+            question = qa_json.get('question', '')
+            correct_answer = qa_json.get('answer', '')
+            
+            # Print the question part
+            print(f"Question: {question}")
+            
+            # Wait for the human to provide an answer
+            user_answer = input("Your answer: ")
+            
+            # Check the provided answer
+            is_correct = check_answer(user_answer, correct_answer)
+            
+            if is_correct:
+                print("Correct!")
+            else:
+                print(f"Incorrect. The correct answer is: {correct_answer}")
+                
+        except json.JSONDecodeError:
+            print("Error parsing the question and answer JSON.")
+
+    else:
+        print("No question and answer generated.")
+
 
 def Answer(index, question):
     query_engine = index.as_query_engine(
