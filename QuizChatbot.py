@@ -52,7 +52,21 @@ def get_random_chunk_text():
 
 def check_answer(user_answer, correct_answer):
     # Implement your answer checking logic here
-    return user_answer.lower() == correct_answer.lower()
+    try:
+        # Make API call
+        # Note: You might need to adjust the model and other parameters as per your use case
+        response = openai.Completion.create(
+            engine="text-davinci-003",  # Use "davinci" or other available engines
+            prompt=f"User answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the user answer fully correct or partially correct or incorrect in comparison to the correct answer?",
+            max_tokens=3500  # Adjust as needed
+        )
+                    # Extract and store response
+        print(response.choices[0].text.strip())
+
+    except Exception as e:
+        print(f"Error processing text: {response.choices[0].text.strip()}. Error: {str(e)}")
+
+    print("The correct answer: " + correct_answer.lower())
 
 
 def Test():
@@ -64,7 +78,10 @@ def Test():
         # Note: You might need to adjust the model and other parameters as per your use case
         response = openai.Completion.create(
             engine="text-davinci-003",  # Use "davinci" or other available engines
-            prompt=f"{text}\n\nGiven the text come-up with a question and answer pair. Put it in JSON format with question and answer fields:",
+            prompt=(
+                f"{text}\n\nGiven the text come-up with a question and answer pair."
+                "Format the response as a JSON object with 'question' and 'answer' fields."
+            ),
             max_tokens=3500  # Adjust as needed
         )
                 # Extract and store response
@@ -88,15 +105,10 @@ def Test():
             user_answer = input("Your answer: ")
             
             # Check the provided answer
-            is_correct = check_answer(user_answer, correct_answer)
+            check_answer(user_answer, correct_answer)
             
-            if is_correct:
-                print("Correct!")
-            else:
-                print(f"Incorrect. The correct answer is: {correct_answer}")
-                
         except json.JSONDecodeError:
-            print("Error parsing the question and answer JSON.")
+            print(f"Error parsing the question and answer JSON: {question_answer}")
 
     else:
         print("No question and answer generated.")
