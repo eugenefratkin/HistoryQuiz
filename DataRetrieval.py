@@ -18,7 +18,7 @@ def connect_to_documentdb():
     # Connection details
     username = "homework"
     password = "fgu3mgh3dtg_her!EPF"
-    cluster_endpoint = "docdb-2023-10-04-23-49-54.cd2f6lgiqcr3.us-east-1.docdb.amazonaws.com"
+    cluster_endpoint = "docdb-2023-10-05-03-51-05.cluster-cmtaffjtvesx.us-east-2.docdb.amazonaws.com"
     port = 27017  # default MongoDB and DocumentDB port
     
     # Connection URI
