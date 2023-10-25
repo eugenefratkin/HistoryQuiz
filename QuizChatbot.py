@@ -54,15 +54,15 @@ def get_random_chunk_text():
 def check_answer(user_answer, correct_answer):
     # Implement your answer checking logic here
     try:
-        # Make API call
-        # Note: You might need to adjust the model and other parameters as per your use case
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Use "davinci" or other available engines
-            prompt=f"User answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the user answer fully correct or partially correct or incorrect in comparison to the correct answer?",
-            max_tokens=3500  # Adjust as needed
-        )
-                    # Extract and store response
-        print(response.choices[0].text.strip())
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"User answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the user answer fully correct or partially correct or incorrect in comparison to the correct answer?"},
+                ]
+            )
+                # Extract and store response
+        print(response['choices'][0]['message']['content'])
 
     except Exception as e:
         print(f"Error processing text: {response.choices[0].text.strip()}. Error: {str(e)}")
@@ -86,18 +86,15 @@ def Test():
     question_answer = None
 
     try:
-        # Make API call
-        # Note: You might need to adjust the model and other parameters as per your use case
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Use "davinci" or other available engines
-            prompt=(
-                f"{text}\n\nGiven the text come-up with a question and answer pair."
-                "Format the response as a JSON object with 'question' and 'answer' fields."
-            ),
-            max_tokens=3500  # Adjust as needed
-        )
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{text}\n\nGiven the text come-up with a question and answer pair. Must format the response as a JSON object with 'question' and 'answer' fields."},
+                ]
+            )
                 # Extract and store response
-        question_answer = response.choices[0].text.strip()
+        question_answer = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
 
     except Exception as e:
         print(f"Error processing text: {text}. Error: {str(e)}")
@@ -150,7 +147,7 @@ def Summarize():
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": f"{chunk}\n\nProvide bullet points of the main ideas and key facts. Only key facts no more than 5-7 points"},
+                        {"role": "user", "content": f"{chunk}\n\nProvide bullet points only of the main hisotrical insights and key facts, such as names, locations, dates, numbers. Do not include citations. Must be no more than 6 points, but can be less if no important information"},
                     ]
                 )
                 # Extract and store response
@@ -180,41 +177,6 @@ def Summarize():
     
     return all_bullet_points  # Return the concatenated list of all bullet points
 
-
-def Summarize_chat():
-    all_chunks_text = get_all_chunks_text(directory)
-    all_bullet_points = []  # Initialize an empty list to hold all bullet points
-
-    chunk_count = 1
-    for chunk in all_chunks_text:
-        try:
-            # Make API call
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": f"{chunk}\n\nProvide bullet points of the main ideas and key facts. Only key facts no more than 5-7 points"},
-                ]
-            )
-            # Extract and store response
-            bullet_points = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
-            
-            print(f"processing chunk {chunk_count}")
-            chunk_count+=1
-            # Extend the all_bullet_points list with the bullet points from this response
-            all_bullet_points.extend(bullet_points)
-
-        except Exception as e:
-            print(f"Error processing text chunk: {chunk}. Error: {str(e)}")
-
-    # Convert the list of all bullet points to a single string with one bullet point per line
-    summary_text = '\n'.join(all_bullet_points)
-    
-    # Write the summary_text to a file called 'Summary'
-    with open(directory + '/Summary-chat.txt', 'w') as file:
-        file.write(summary_text)
-    
-    return all_bullet_points  # Return the concatenated list of all bullet points
 
 def get_chunk_count(index):
     # Fetch all ids from the Pinecone index
