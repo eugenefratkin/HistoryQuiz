@@ -26,7 +26,7 @@ DIMENSION_VALUE = 1536 # Number of dimentions used for embedding
 # Initialize Pinecone
 pinecone.init(api_key="9e656193-e394-43af-8147-5dcc62a22ef2", environment="asia-southeast1-gcp-free")
 
-directory = "/Users/efratkin/Code Projects/HistoryQuiz/output"
+directory = "./output"
 
 def parse_docs_to_nodes(documents):
     parser = SimpleNodeParser.from_defaults(chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP)
@@ -88,7 +88,7 @@ def chunk_and_vectorize(directory):
     #    show_progress=True
     #)
     index.set_index_id("vector_index")
-    index.storage_context.persist("/Users/efratkin/Code Projects/HistoryQuiz/index")
+    index.storage_context.persist("./index")
 
 # Call the function with your text
 chunk_and_vectorize(directory)

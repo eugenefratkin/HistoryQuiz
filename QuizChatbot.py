@@ -16,7 +16,7 @@ from llama_index.query_engine import RetrieverQueryEngine
 
 index_name = "history-chunks"
 total_vector_count = 0
-directory = "/Users/efratkin/Code Projects/HistoryQuiz/output"
+directory = "./output"
 
 import keyring
 import os
@@ -55,7 +55,7 @@ def check_answer(user_answer, correct_answer):
     # Implement your answer checking logic here
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"User answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the user answer fully correct or partially correct or incorrect in comparison to the correct answer?"},
@@ -87,7 +87,7 @@ def Test():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"{text}\n\nGiven the text come-up with a question and answer pair. Must format the response as a JSON object with 'question' and 'answer' fields."},
@@ -132,6 +132,9 @@ def Answer(index, question):
     print(response)
 
 def Summarize():
+     # Open and immediately close 'Summary.txt' in write mode to clear its contents
+    with open(directory + '/Summary.txt', 'w') as file:
+        pass
     all_chunks_text = get_all_chunks_text(directory)
     chunk_count = 1
     import time
@@ -144,7 +147,7 @@ def Summarize():
             try:
                 # Make API call
                 response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": f"{chunk}\n\nProvide bullet points only of the main hisotrical insights and key facts, such as names, locations, dates, numbers. Do not include citations. Must be no more than 6 points, but can be less if no important information"},

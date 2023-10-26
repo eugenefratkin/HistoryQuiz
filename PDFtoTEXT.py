@@ -56,5 +56,5 @@ def convert_pdfs_in_directory(directory_path):
     print(f'Text has been written to {txt_file_path}')
 
 # Example usage:
-directory_path = "/Users/efratkin/Code Projects/HistoryQuiz"
+directory_path = "."
 convert_pdfs_in_directory(directory_path)
