@@ -19,7 +19,7 @@ else:
     print("Failed to retrieve the API key.")
 
 # Define the chunk and overlap sizes
-CHUNK_SIZE = 500  # Adjust this value to your needs
+CHUNK_SIZE = 1000  # Adjust this value to your needs
 OVERLAP = 100  # Adjust this value to your needs
 DIMENSION_VALUE = 1536 # Number of dimentions used for embedding
 

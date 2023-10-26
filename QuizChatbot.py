@@ -58,7 +58,7 @@ def check_answer(user_answer, correct_answer):
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": f"User answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the user answer fully correct or partially correct or incorrect in comparison to the correct answer?"},
+                {"role": "user", "content": f"User Answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the User Answer when compared to Correct Answer correct or partially correct or incorrect? In case User Answer is empty or makes no sense it is incorrect"},
                 ]
             )
                 # Extract and store response
