@@ -143,6 +143,8 @@ def Summarize():
         success = False  # Variable to track if processing the chunk succeeded
         retries = 0  # Variable to track the number of retries
 
+        chunk_count += 1
+
         while not success and retries < 3:  # Assuming a maximum of 3 retries per chunk
             try:
                 # Make API call
@@ -150,7 +152,7 @@ def Summarize():
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": f"{chunk}\n\nProvide bullet points only of the main hisotrical insights and key facts, such as names, locations, dates, numbers. Do not include citations. Must be no more than 6 points, but can be less if no important information"},
+                        {"role": "user", "content": f"{chunk}\n\nProvide bullet points only of the main hisotrical insights and key facts, such as names, locations, dates, numbers. Do not include citations. Must be no more than 6 points, but can be less if no important information. Avoid duplication of the same facts"},
                     ]
                 )
                 # Extract and store response
@@ -168,8 +170,6 @@ def Summarize():
                 print(f"Error processing text chunk: {chunk}. Error: {str(e)}. Retrying in 5 seconds...")
                 retries += 1  # Increment the retries count
                 time.sleep(5)  # Wait for 5 seconds before retrying
-
-            chunk_count += 1
 
         if not success:
             print(f"Failed to process chunk {chunk} after {retries} retries.")
