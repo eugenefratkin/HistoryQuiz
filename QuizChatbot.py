@@ -166,22 +166,6 @@ def Question_and_Image():
         print(f"Function: {function_name}")
         print(response)
 
-    #
-    #try:
-    #    response = openai.ChatCompletion.create(
-    #        model="gpt-4",
-    #        messages=[
-    #            {"role": "system", "content": "You are a helpful assistant."},
-    #            {"role": "user", "content": f"{text}\n\nGiven the text come-up with a question and answer pair. Must format the response as a JSON object with 'question' and 'answer' fields."},
-    #            ]
-    #        )
-    #            # Extract and store response
-    #    question_answer = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
-
-    #except Exception as e:
-    #    print(f"Error processing text: {text}. Error: {str(e)}")
-    #    question_answer.append(None)
-
     # Parse the question and answer from the API response
     if question_answer:
         try:
