@@ -6,8 +6,9 @@ import random
 import os
 import json
 import openai
-import time
+import requests
 import keyring
+from concurrent.futures import ThreadPoolExecutor
 from llama_index import (
     VectorStoreIndex,
 )
@@ -68,6 +69,7 @@ def check_answer(user_answer, correct_answer):
         print(f"Error processing text: {response.choices[0].text.strip()}. Error: {str(e)}")
 
     print("The correct answer: " + correct_answer.lower())
+    return response['choices'][0]['message']['content']
 
 def get_all_chunks_text(directory):
     # Load and parse the JSON file
@@ -122,6 +124,89 @@ def Test():
     else:
         print("No question and answer generated.")
 
+def get_question(text):
+    question_answer = None
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{text}\n\nGiven the text come-up with a question and answer pair. Must format the response as a JSON object with 'question' and 'answer' fields."},
+                ]
+            )
+                # Extract and store response
+        question_answer = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
+
+    except Exception as e:
+        print(f"Error processing text: {text}. Error: {str(e)}")
+        question_answer.append(None)
+
+    return question_answer
+
+
+def Question_and_Image():
+    text = get_random_chunk_text()
+    description = None
+    question_answer = None
+    json_question_answer = None
+
+    with ThreadPoolExecutor() as executor:
+        futures = {
+            'Image': executor.submit(Image, text),
+            'get_question': executor.submit(get_question, text)
+        }
+
+    results = [(fn, future.result()) for fn, future in futures.items()]
+
+    for function_name, response in results:
+        if function_name == "Image":
+            description = response
+        elif function_name == "get_question":
+            question_answer = response
+        print(f"Function: {function_name}")
+        print(response)
+
+    #
+    #try:
+    #    response = openai.ChatCompletion.create(
+    #        model="gpt-4",
+    #        messages=[
+    #            {"role": "system", "content": "You are a helpful assistant."},
+    #            {"role": "user", "content": f"{text}\n\nGiven the text come-up with a question and answer pair. Must format the response as a JSON object with 'question' and 'answer' fields."},
+    #            ]
+    #        )
+    #            # Extract and store response
+    #    question_answer = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
+
+    #except Exception as e:
+    #    print(f"Error processing text: {text}. Error: {str(e)}")
+    #    question_answer.append(None)
+
+    # Parse the question and answer from the API response
+    if question_answer:
+        try:
+            qa_json = json.loads(question_answer)
+            question = qa_json.get('question', '')
+            answer = qa_json.get('answer', '')
+
+            # Convert to dictionary
+            data = {
+                "question": question,
+                "answer": answer,
+                "description": description
+            }
+
+            # Convert dictionary to JSON string
+            json_question_answer = json.dumps(data)
+            
+        except json.JSONDecodeError:
+            print(f"Error parsing the question and answer JSON: {question_answer}")
+
+    else:
+        print("No question and answer generated.")
+
+    return json_question_answer
+
 
 def Answer(index, question):
     query_engine = index.as_query_engine(
@@ -130,6 +215,48 @@ def Answer(index, question):
         verbose=True)
     response = query_engine.query(question)
     print(response)
+
+def Image(text=None):
+    description = None
+
+    if text == None:
+        text = get_random_chunk_text()
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"This is the text provided: {text}\n\n Create a 15 words or less description of an image inspired by the text"},
+                ]
+            )
+                # Extract and store response
+        image_description = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
+
+    except Exception as e:
+        print(f"Error processing text: {text}. Error: {str(e)}")
+        image_description.append(None)
+
+    description = image_description
+    response = openai.Image.create(
+        prompt=image_description,
+        n=1,
+        size="1024x1024"
+    )
+    image_url = response['data'][0]['url']
+
+    # Send a GET request to the image URL
+    response = requests.get(image_url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Specify the local path where the image will be saved
+        with open(directory + "/local_image.jpg", "wb") as file:
+            file.write(response.content)
+    else:
+        print("Failed to fetch the image.")
+
+    return description
 
 def Summarize():
      # Open and immediately close 'Summary.txt' in write mode to clear its contents
@@ -195,6 +322,7 @@ def main():
     while True:
         print("\nMenu:")
         print("Test - T")
+        print("Image - I")
         print("Answer - A")
         print("Summarize - S")
         print("Quit - Q")
@@ -207,6 +335,8 @@ def main():
         elif choice == 'A':
             question = input("Enter your question: ")
             Answer(index, question)
+        elif choice == 'I':
+            Image()
         elif choice == 'Q':
             print("Exiting...")
             break

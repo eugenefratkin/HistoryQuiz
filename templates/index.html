@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History AI</title>
+    <style>
+        body {
+            background-color: lightblue;
+            font-family: Arial, sans-serif;
+            text-align: center; /* Center everything */
+        }
+
+        h1 {
+            font-size: 3em; /* Large title */
+            margin-top: 50px; /* Add some top margin */
+        }
+
+        img {
+            width: 512px; /* Set image width */
+            height: 512px; /* Set image height */
+            display: block; /* Make it a block element */
+            margin: 50px auto; /* Center the image and add some vertical space */
+        }
+
+        p {
+            font-size: 1.2em;
+        }
+
+        form {
+            display: inline-block; /* To center align with the rest of the content */
+            text-align: left; /* Left-align content within the form */
+        }
+
+        #user_answer {
+            width: 900px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>History AI</h1> <!-- Large website title -->
+
+<div>
+    <img src="{{ image_url }}" alt="Dynamically Generated Image">
+    <!-- Centered description under the image -->
+
+    <form action="/" method="post" id="mainForm">
+        <h2>Question:</h2>
+        <h3>{{ question }}</h3>
+
+        <!-- Answer input field -->
+        <label for="user_answer">Your Answer:</label>
+        <input type="text" id="user_answer" name="user_answer"><br><br>
+
+
+        <p>{{ verdict }}</p>
+        <p>{{ right_answer }}</p>
+
+        <button type="submit" name="test">Test</button> 
+        <button type="submit" name="next">Next</button> 
+    </form>
+</div>
+
+</body>
+</html>
