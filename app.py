@@ -22,25 +22,29 @@ buffer_lock = threading.Lock()
 
 # Condition object to control access to the buffer
 buffer_condition = threading.Condition(buffer_lock)
-buffer_size = 2
+buffer_size = 3
+
 
 def fill_buffer():
     while True:
-        # Check if the buffer has less than buffer_size elements
         with buffer_condition:
             if len(question_answer_buffer) < buffer_size:
-                question_answer = Question_and_Image()
-                question_answer_buffer.append(json.loads(question_answer))
-                print(f"After Buffer size is: {len(question_answer_buffer)}")
-                buffer_condition.notify()  # Notify any waiting threads
+                try:
+                    question_answer = Question_and_Image()
+                    question_answer_buffer.append(json.loads(question_answer))
+                    print(f"Add new images: {len(question_answer_buffer)}")
+                except Exception as e:
+                    print(f"Error while processing Question_and_Image: {e}")
+                else:  # Only notify if there was no exception
+                    buffer_condition.notify()
             else:
-                # If buffer is full (5 elements), wait for a short duration before checking again
-                time.sleep(3)
+                # If buffer is full, wait for a short duration before checking again
+                time.sleep(1)
 
 threading.Thread(target=fill_buffer).start()
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def index(): 
     # Default description
     session.setdefault('description', "")
     session.setdefault('file_location', "placeholder.png")
@@ -58,12 +62,11 @@ def index():
             print(f"DEBUG 1: Current time is {datetime.datetime.now()}")
 
             # Pop the first item from the buffer
-            with buffer_condition:
-                print(f"Current Buffer size is: {len(question_answer_buffer)}")
-                while not question_answer_buffer:  # Wait until the buffer is not empty
-                    buffer_condition.wait()
-                # Use the first item from the buffer and remove it
-                current_question_answer = question_answer_buffer.pop(0)
+            while not question_answer_buffer:  # Wait until the buffer is not empty
+                 time.sleep(1)
+
+            # Use the first item from the buffer and remove it
+            current_question_answer = question_answer_buffer.pop(0)
 
             print(f"DEBUG 2: Current time is {datetime.datetime.now()}")
 
@@ -103,14 +106,9 @@ def index():
     return render_template('index.html', image_url=image_url, description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False))
 
 
-# ... (previous code) ...
-
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# ... (rest of the code) ...
-
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

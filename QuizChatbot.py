@@ -58,7 +58,7 @@ def check_answer(user_answer, correct_answer):
     # Implement your answer checking logic here
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"User Answer:{user_answer}\n\nCorrect Answer:{correct_answer}\n\nRespond in a very short way - is the User Answer when compared to Correct Answer correct or partially correct or incorrect? In case User Answer is empty or makes no sense it is incorrect"},
@@ -216,10 +216,10 @@ def Image(text=None):
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": f"This is the text provided: {text}\n\n Create a 15 words or less description of an image inspired by the text"},
+                {"role": "user", "content": f"7 word or less describe an single physical object related to or mentioned in this paragraph: {text}\n\n"},
                 ]
             )
                 # Extract
@@ -234,7 +234,7 @@ def Image(text=None):
     response = openai.Image.create(
         prompt=image_description,
         n=1,
-        size="1024x1024"
+        size="512x512"
     )
     image_url = response['data'][0]['url']
 
