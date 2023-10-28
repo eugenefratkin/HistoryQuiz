@@ -4,11 +4,12 @@ import json
 import threading
 import time
 import datetime
-import queue
+import os
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = '/Users/efratkin/Code Projects/HistoryQuiz/output'  # e.g., 'uploads'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # This gets the directory of the current script
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'output')  # Assuming 'output' is a sub-directory of the script's directory
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
