@@ -8,6 +8,7 @@ import json
 import openai
 import requests
 import keyring
+import uuid  # For generating random file names
 from concurrent.futures import ThreadPoolExecutor
 from llama_index import (
     VectorStoreIndex,
@@ -18,6 +19,7 @@ from llama_index.query_engine import RetrieverQueryEngine
 index_name = "history-chunks"
 total_vector_count = 0
 directory = "./output"
+image_directory = "./output"
 
 import keyring
 import os
@@ -100,7 +102,7 @@ def Test():
 
     except Exception as e:
         print(f"Error processing text: {text}. Error: {str(e)}")
-        question_answer.append(None)
+        question_answer = "Error generating description"
 
     # Parse the question and answer from the API response
     if question_answer:
@@ -139,7 +141,7 @@ def get_question(text):
 
     except Exception as e:
         print(f"Error processing text: {text}. Error: {str(e)}")
-        question_answer.append(None)
+        question_answer = "Error generating description"
 
     return question_answer
 
@@ -160,7 +162,7 @@ def Question_and_Image():
 
     for function_name, response in results:
         if function_name == "Image":
-            description = response
+            description_and_location_json = response
         elif function_name == "get_question":
             question_answer = response
         print(f"Function: {function_name}")
@@ -173,11 +175,17 @@ def Question_and_Image():
             question = qa_json.get('question', '')
             answer = qa_json.get('answer', '')
 
+            # Convert the JSON string to a Python dictionary
+            description_and_location = json.loads(description_and_location_json)
+            description = description_and_location.get('description','')
+            file_location = description_and_location.get('file_location','')
+            
             # Convert to dictionary
             data = {
                 "question": question,
                 "answer": answer,
-                "description": description
+                "description": description,
+                "file_location":file_location
             }
 
             # Convert dictionary to JSON string
@@ -201,7 +209,7 @@ def Answer(index, question):
     print(response)
 
 def Image(text=None):
-    description = None
+    image_description = None
 
     if text == None:
         text = get_random_chunk_text()
@@ -214,12 +222,13 @@ def Image(text=None):
                 {"role": "user", "content": f"This is the text provided: {text}\n\n Create a 15 words or less description of an image inspired by the text"},
                 ]
             )
-                # Extract and store response
+                # Extract
+                #  and store response
         image_description = response['choices'][0]['message']['content']  # Assume each bullet point is on a new line
 
     except Exception as e:
         print(f"Error processing text: {text}. Error: {str(e)}")
-        image_description.append(None)
+        image_description = "Error generating description"
 
     description = image_description
     response = openai.Image.create(
@@ -229,18 +238,23 @@ def Image(text=None):
     )
     image_url = response['data'][0]['url']
 
+    # Generate a random name for the image
+    random_filename = f"{uuid.uuid4()}.jpg"
+    file_location = os.path.join(image_directory, random_filename)
+
     # Send a GET request to the image URL
     response = requests.get(image_url)
 
     # Check if the request was successful
     if response.status_code == 200:
         # Specify the local path where the image will be saved
-        with open(directory + "/local_image.jpg", "wb") as file:
+        with open(file_location, "wb") as file:
             file.write(response.content)
     else:
         print("Failed to fetch the image.")
 
-    return description
+    # Return a JSON response containing the description and file_location
+    return json.dumps({"description": description, "file_location": random_filename})
 
 def Summarize():
      # Open and immediately close 'Summary.txt' in write mode to clear its contents
