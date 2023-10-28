@@ -18,8 +18,11 @@ from llama_index.query_engine import RetrieverQueryEngine
 
 index_name = "history-chunks"
 total_vector_count = 0
-directory = "./output"
-image_directory = "./output"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # This gets the directory of the current script
+directory = os.path.join(BASE_DIR, 'output') 
+image_directory = os.path.join(BASE_DIR, 'output') # Assuming 'output' is a sub-directory of the script's directory
+
 
 import keyring
 import os
