@@ -84,7 +84,8 @@
 
 <div class="content-container">
     <h1>History AI</h1> <!-- Large website title -->
-    <img id="quizImage" src="{{ image_url or 'uploads/placeholder.png' }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}">
+    <!--<img id="quizImage" src="{{ image_url or 'uploads/placeholder.png' }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}"> -->
+    <img id="quizImage" src="{{ image_url }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}">
     <!-- Centered description under the image -->
 
     <div class="spinner"></div>
@@ -114,6 +115,15 @@
             spinner.style.display = 'block'; // Show spinner on button click
         });
     });
+
+    window.onload = function() {
+        const quizImage = document.getElementById('quizImage');
+        
+        quizImage.onerror = function() {
+            this.src = 'placeholder.png';
+            this.onerror = null;  // Remove the onerror handler to prevent endless loop in case placeholder image also fails
+        };
+    };
 
     // When results are returned, you'll hide the spinner:
     // spinner.style.display = 'none';
