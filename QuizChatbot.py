@@ -21,6 +21,7 @@ total_vector_count = 0
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # This gets the directory of the current script
 directory = os.path.join(BASE_DIR, 'output') 
+selection_counts_file = directory + '/selection_counts.json'
 image_directory = os.path.join(BASE_DIR, 'output') # Assuming 'output' is a sub-directory of the script's directory
 
 
@@ -46,13 +47,29 @@ def connect_to_DB():
     service_context = ServiceContext.from_defaults(llm=OpenAI())
     return VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
 
+
 def get_random_chunk_text():
     # Load and parse the JSON file
     with open(directory+"/nodes.json", 'r') as file:
         nodes = json.load(file)
     
-    # Randomly select one of the serialized nodes
-    random_node = random.choice(nodes)
+    # Load selection counts or initialize with zeros if it doesn't exist
+    try:
+        with open(selection_counts_file, 'r') as file:
+            selection_counts = json.load(file)
+    except FileNotFoundError:
+        selection_counts = {node['id']: 0 for node in nodes}
+    
+    # Calculate weights
+    weights = [1/(selection_counts.get(node['id'], 0) + 1) for node in nodes]
+    
+    # Weighted random choice
+    random_node = random.choices(nodes, weights, k=1)[0]
+    
+    # Update and save the selection count
+    selection_counts[random_node['id']] = selection_counts.get(random_node['id'], 0) + 1
+    with open(selection_counts_file, 'w') as file:
+        json.dump(selection_counts, file)
     
     # Extract and return the text of the randomly selected node
     return random_node['text']
