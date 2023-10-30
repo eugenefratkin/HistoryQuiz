@@ -25,7 +25,6 @@ buffer_lock = threading.Lock()
 buffer_condition = threading.Condition(buffer_lock)
 buffer_size = 3
 
-
 def fill_buffer():
     while True:
         with buffer_condition:
@@ -83,7 +82,7 @@ def index():
                 image_url = url_for('uploaded_file', filename=image_filename)
 
             # Replenish the buffer in a separate thread
-            #threading.Thread(target=fill_buffer).start()
+            threading.Thread(target=fill_buffer).start()
         
             return redirect(url_for('index'))
         else:

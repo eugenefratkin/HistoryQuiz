@@ -58,16 +58,16 @@ def get_random_chunk_text():
         with open(selection_counts_file, 'r') as file:
             selection_counts = json.load(file)
     except FileNotFoundError:
-        selection_counts = {node['id']: 0 for node in nodes}
+        selection_counts = {node['id_']: 0 for node in nodes}
     
     # Calculate weights
-    weights = [1/(selection_counts.get(node['id'], 0) + 1) for node in nodes]
+    weights = [1/(selection_counts.get(node['id_'], 0) + 1) for node in nodes]
     
     # Weighted random choice
     random_node = random.choices(nodes, weights, k=1)[0]
     
     # Update and save the selection count
-    selection_counts[random_node['id']] = selection_counts.get(random_node['id'], 0) + 1
+    selection_counts[random_node['id_']] = selection_counts.get(random_node['id_'], 0) + 1
     with open(selection_counts_file, 'w') as file:
         json.dump(selection_counts, file)
     
