@@ -39,7 +39,7 @@ def fill_buffer():
                     buffer_condition.notify()
             else:
                 # If buffer is full, wait for a short duration before checking again
-                time.sleep(1)
+                time.sleep(2)
 
 threading.Thread(target=fill_buffer).start()
 
@@ -63,7 +63,7 @@ def index():
 
             # Pop the first item from the buffer
             while not question_answer_buffer:  # Wait until the buffer is not empty
-                 time.sleep(1)
+                 time.sleep(2)
 
             # Use the first item from the buffer and remove it
             current_question_answer = question_answer_buffer.pop(0)

@@ -5,7 +5,6 @@ from llama_index.vector_stores import PineconeVectorStore
 from llama_index.llms import OpenAI
 import json
 import pinecone
-
 import keyring
 import os
 
