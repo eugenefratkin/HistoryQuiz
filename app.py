@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
-from QuizChatbot import Test, Answer, Image, check_answer, Question_and_Image
+from QuizChatbot import check_answer, Question_and_Image
 import json
 import threading
 import time
@@ -54,9 +54,8 @@ def index():
     session.setdefault('verdict', "")
     session.setdefault('answer', "")
     session.setdefault('right_answer', "")
-
-    # In the index function
-    pdf_filename = "Copy of Chapter 7.pdf"  # Define the PDF filename
+    session.setdefault('pdf_filename', "")
+    session.setdefault('page_number', 1)
 
     if request.method == 'POST':
         if 'next' in request.form:  # Check if the "press" button was clicked
@@ -72,6 +71,7 @@ def index():
 
             # Use the first item from the buffer and remove it
             current_question_answer = question_answer_buffer.pop(0)
+            pdf_filename = current_question_answer
 
             print(f"DEBUG 2: Current time is {datetime.datetime.now()}")
 
@@ -80,6 +80,8 @@ def index():
             session['question'] = current_question_answer.get('question', '')
             session['answer'] = current_question_answer.get('answer', '')  # Store the description in session
             session['fly_in'] = True  # Set a flag
+            session['pdf_filename'] = current_question_answer.get('pdf_file', '')
+            session['page_number'] = current_question_answer.get('page', '')
 
             # If there's a description in the session, it means the "Next" button was clicked and we should display the specific image.
             if session['description']:
@@ -107,10 +109,10 @@ def index():
     # Generate the image URL dynamically if needed
     print("current file location: " + session['file_location'])
     image_url = url_for('uploaded_file', filename=session['file_location'])
-    pdf_url = url_for('pdf_file', filename=pdf_filename)
+    pdf_url = url_for('pdf_file', filename=session['pdf_filename'])
     print("PDF path:" + pdf_url)
 
-    return render_template('index.html', image_url=image_url, description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False), pdf_url=pdf_url)
+    return render_template('index.html', image_url=image_url, page_number=session['page_number'], description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False), pdf_url=pdf_url)
 
 
 @app.route('/uploads/<filename>')

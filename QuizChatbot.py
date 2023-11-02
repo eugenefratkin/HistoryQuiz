@@ -167,7 +167,8 @@ def get_question(text):
 
 
 def Question_and_Image():
-    text = get_random_chunk()['text']
+    random_chunk = get_random_chunk()
+    text = random_chunk['text']
     description = None
     question_answer = None
     json_question_answer = None
@@ -185,8 +186,6 @@ def Question_and_Image():
             description_and_location_json = response
         elif function_name == "get_question":
             question_answer = response
-        print(f"Function: {function_name}")
-        print(response)
 
     # Parse the question and answer from the API response
     if question_answer:
@@ -206,8 +205,14 @@ def Question_and_Image():
                 "answer": answer,
                 "description": description,
                 "file_location":file_location,
-                "chunk": text
+                "chunk": text,
+                "page": random_chunk['page_number'],
+                "pdf_file": random_chunk['document_name'][:-3] + 'pdf'
             }
+
+            for key, value in data.items():
+                if key != "chunk":
+                    print(f"{key}: {value}")
 
             # Convert dictionary to JSON string
             json_question_answer = json.dumps(data)

@@ -126,7 +126,7 @@
     </div>
 
     <div class="right-content">
-        <object id="pdfDisplay" data="{{ pdf_url }}#page=3" type="application/pdf" width="900" height="900">
+        <object id="pdfDisplay" data="{{ pdf_url }}#page={{ page_number }}" type="application/pdf" width="900" height="900">
             <embed src="{{ pdf_url }}" type="application/pdf" />
             Your browser does not support viewing PDFs. Please download the PDF to view it: <a href="{{ pdf_url }}">Download PDF</a>
         </object>
