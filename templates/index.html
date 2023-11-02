@@ -9,7 +9,7 @@
             background-color: lightblue;
             font-family: Arial, sans-serif;
             text-align: center; /* Center everything */
-            margin: 0;
+            margin: 10;
             padding: 0;
         }
 
@@ -21,7 +21,7 @@
             width: 512px; /* Set image width */
             height: 512px; /* Set image height */
             display: block; /* Make it a block element */
-            margin: 50px auto; /* Center the image and add some vertical space */
+            margin: 20px auto; /* Center the image and add some vertical space */
         }
 
         p {
@@ -31,20 +31,38 @@
         form {
             display: block; /* Full width of the container */
             text-align: left; /* Left-align content within the form */
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         #user_answer {
-            width: 900px;
+            width: 700px;
         }
 
         /* Container for the content to center it and add margins */
         .content-container {
-            width: 80%; /* Or a fixed width like 1200px if preferred */
-            max-width: 1200px;
-            margin: 0 auto; /* Centers the container */
-            padding: 50px 0; /* Some padding at the top and bottom */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
         }
+
+        .left-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center items vertically */
+            gap: 10px; /* Space between items */
+        }
+
+        .right-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
 
         /* Spinner styles */
         .spinner {
@@ -83,27 +101,36 @@
 <body>
 
 <div class="content-container">
-    <h1>History AI</h1> <!-- Large website title -->
-    <!--<img id="quizImage" src="{{ image_url or 'uploads/placeholder.png' }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}"> -->
-    <img id="quizImage" src="{{ image_url }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}">
-    <!-- Centered description under the image -->
+    <div class="left-content">
+        <h1>History AI</h1> <!-- Large website title -->
+        <!--<img id="quizImage" src="{{ image_url or 'uploads/placeholder.png' }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}"> -->
+        <img id="quizImage" src="{{ image_url }}" alt="Dynamically Generated Image" class="{{ 'fly-in' if fly_in else '' }}">
+        <!-- Centered description under the image -->
 
-    <div class="spinner"></div>
+        <div class="spinner"></div>
 
-    <form action="/" method="post" id="mainForm">
-        <h2>Question:</h2>
-        <h3>{{ question }}</h3>
+        <form action="/" method="post" id="mainForm">
+            <h2>Question:</h2>
+            <h3>{{ question }}</h3>
 
-        <!-- Answer input field -->
-        <label for="user_answer">Your Answer:</label>
-        <input type="text" id="user_answer" name="user_answer"><br><br>
+            <!-- Answer input field -->
+            <label for="user_answer">Your Answer:</label>
+            <input type="text" id="user_answer" name="user_answer"><br><br>
 
-        <p>{{ verdict }}</p>
-        <p>{{ right_answer }}</p>
+            <p>{{ verdict }}</p>
+            <p>{{ right_answer }}</p>
 
-        <button type="submit" name="test">Test</button> 
-        <button type="submit" name="next">Next</button> 
-    </form>
+            <button type="submit" name="test">Test</button> 
+            <button type="submit" name="next">Next</button> 
+        </form>
+    </div>
+
+    <div class="right-content">
+        <object id="pdfDisplay" data="{{ pdf_url }}#page=3" type="application/pdf" width="900" height="900">
+            <embed src="{{ pdf_url }}" type="application/pdf" />
+            Your browser does not support viewing PDFs. Please download the PDF to view it: <a href="{{ pdf_url }}">Download PDF</a>
+        </object>
+    </div>
 </div>
 
 <script>
@@ -124,9 +151,6 @@
             this.onerror = null;  // Remove the onerror handler to prevent endless loop in case placeholder image also fails
         };
     };
-
-    // When results are returned, you'll hide the spinner:
-    // spinner.style.display = 'none';
 
 </script>
 

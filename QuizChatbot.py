@@ -48,7 +48,7 @@ def connect_to_DB():
     return VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
 
 
-def get_random_chunk_text():
+def get_random_chunk():
     # Load and parse the JSON file
     with open(directory+"/nodes.json", 'r') as file:
         nodes = json.load(file)
@@ -72,7 +72,7 @@ def get_random_chunk_text():
         json.dump(selection_counts, file)
     
     # Extract and return the text of the randomly selected node
-    return random_node['text']
+    return random_node
 
 def check_answer(user_answer, correct_answer):
     # Implement your answer checking logic here
@@ -106,7 +106,7 @@ def get_all_chunks_text(directory):
 
 
 def Test():
-    text = get_random_chunk_text()
+    text = get_random_chunk()['text']
     question_answer = None
 
     try:
@@ -167,7 +167,7 @@ def get_question(text):
 
 
 def Question_and_Image():
-    text = get_random_chunk_text()
+    text = get_random_chunk()['text']
     description = None
     question_answer = None
     json_question_answer = None
@@ -205,7 +205,8 @@ def Question_and_Image():
                 "question": question,
                 "answer": answer,
                 "description": description,
-                "file_location":file_location
+                "file_location":file_location,
+                "chunk": text
             }
 
             # Convert dictionary to JSON string
@@ -232,14 +233,14 @@ def Image(text=None):
     image_description = None
 
     if text == None:
-        text = get_random_chunk_text()
+        text = get_random_chunk()['text']
 
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": f"7 word or less describe an single physical object related to or mentioned in this paragraph: {text}\n\n"},
+                {"role": "user", "content": f"7 word or less, describe a single physical object or scene that is mentioned in this text. Those must be easy to draw. Here is the text: {text}\n\n"},
                 ]
             )
                 # Extract

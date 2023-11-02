@@ -9,10 +9,12 @@ import os
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # This gets the directory of the current script
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'output')  # Assuming 'output' is a sub-directory of the script's directory
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'output')
+PDF_FOLDER = os.path.join(BASE_DIR, 'test')  # Assuming 'output' is a sub-directory of the script's directory
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PDF_FOLDER'] = PDF_FOLDER
 app.config['SECRET_KEY'] = 'tjhsoiw;lks'
 
 # Buffer for question-answer objects
@@ -52,6 +54,9 @@ def index():
     session.setdefault('verdict', "")
     session.setdefault('answer', "")
     session.setdefault('right_answer', "")
+
+    # In the index function
+    pdf_filename = "Copy of Chapter 7.pdf"  # Define the PDF filename
 
     if request.method == 'POST':
         if 'next' in request.form:  # Check if the "press" button was clicked
@@ -102,13 +107,20 @@ def index():
     # Generate the image URL dynamically if needed
     print("current file location: " + session['file_location'])
     image_url = url_for('uploaded_file', filename=session['file_location'])
+    pdf_url = url_for('pdf_file', filename=pdf_filename)
+    print("PDF path:" + pdf_url)
 
-    return render_template('index.html', image_url=image_url, description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False))
+    return render_template('index.html', image_url=image_url, description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False), pdf_url=pdf_url)
 
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/pdf/<filename>')
+def pdf_file(filename):
+    return send_from_directory(app.config['PDF_FOLDER'], filename)
+
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
