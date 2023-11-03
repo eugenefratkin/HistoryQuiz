@@ -62,6 +62,7 @@ def index():
             print("Next")
             session['verdict'] = ""
             session['right_answer'] = ""
+            old_image = session['file_location']
 
             print(f"DEBUG 1: Current time is {datetime.datetime.now()}")
 
@@ -71,7 +72,6 @@ def index():
 
             # Use the first item from the buffer and remove it
             current_question_answer = question_answer_buffer.pop(0)
-            pdf_filename = current_question_answer
 
             print(f"DEBUG 2: Current time is {datetime.datetime.now()}")
 
@@ -90,6 +90,21 @@ def index():
 
             # Replenish the buffer in a separate thread
             threading.Thread(target=fill_buffer).start()
+
+            # Delete the first file
+            if os.path.exists(old_image):
+                os.remove(old_image)
+                print(f"'{old_image}' has been deleted.")
+            else:
+                print(f"'{old_image}' does not exist.")
+
+            old_image = f"QA_{old_image}.JSON"
+            # Delete the second file
+            if os.path.exists(old_image):
+                os.remove(old_image)
+                print(f"'{old_image}' has been deleted.")
+            else:
+                print(f"'{old_image}' does not exist.")
         
             return redirect(url_for('index'))
         else:

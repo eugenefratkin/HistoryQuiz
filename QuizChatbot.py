@@ -193,8 +193,7 @@ def Question_and_Image():
             qa_json = json.loads(question_answer)
             question = qa_json.get('question', '')
             answer = qa_json.get('answer', '')
-
-            # Convert the JSON string to a Python dictionary
+           
             description_and_location = json.loads(description_and_location_json)
             description = description_and_location.get('description','')
             file_location = description_and_location.get('file_location','')
@@ -215,8 +214,8 @@ def Question_and_Image():
                     print(f"{key}: {value}")
 
             # Generate a random string for the filename
-            randomness = str(uuid.uuid4())[:8]  # You can adjust the length as needed
-            filename = f"QA_{randomness}.JSON"
+            #randomness = str(uuid.uuid4())[:8]  # You can adjust the length as needed
+            filename = f"QA_{ data.get('file_location','') }.JSON"
 
             # Write data to the JSON file
             with open(image_directory + "/" + filename, 'w') as json_file:
