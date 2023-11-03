@@ -214,6 +214,14 @@ def Question_and_Image():
                 if key != "chunk":
                     print(f"{key}: {value}")
 
+            # Generate a random string for the filename
+            randomness = str(uuid.uuid4())[:8]  # You can adjust the length as needed
+            filename = f"QA_{randomness}.JSON"
+
+            # Write data to the JSON file
+            with open(image_directory + "/" + filename, 'w') as json_file:
+                json.dump(data, json_file, indent=4)
+
             # Convert dictionary to JSON string
             json_question_answer = json.dumps(data)
             
