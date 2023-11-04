@@ -158,7 +158,6 @@ def index():
     print("current file location: " + session['file_location'])
     image_url = url_for('uploaded_file', filename=session['file_location'])
     pdf_url = url_for('pdf_file', filename=session['pdf_filename'])
-    print("PDF path:" + pdf_url)
     icon_url = url_for('icon_file', filename=session['icon_filename'])
 
     return render_template('index.html', icon_url=icon_url, image_url=image_url, page_number=session['page_number'], description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False), pdf_url=pdf_url)
