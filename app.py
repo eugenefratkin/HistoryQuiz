@@ -43,6 +43,34 @@ def fill_buffer():
                 # If buffer is full, wait for a short duration before checking again
                 time.sleep(2)
 
+def fill_buffer_from_dir(directory_path):
+    # List all files in the specified directory
+    all_files = os.listdir(directory_path)
+
+    # Filter out files that match the naming pattern
+    qa_files = [f for f in all_files if f.startswith('QA_') and f.endswith('.JSON')]
+
+    for qa_file in qa_files:
+        # Construct the full path to the file
+        file_path = os.path.join(directory_path, qa_file)
+        
+        with open(file_path, 'r') as file:
+            try:
+                # Load the JSON content of the file
+                qa_data = json.load(file)
+                
+                # Append the JSON content to the buffer
+                question_answer_buffer.append(qa_data)
+
+            except json.JSONDecodeError:
+                print(f"Error parsing the JSON content of {qa_file}")
+
+    print(f"Added {len(qa_files)} questions and answers from directory {directory_path} to the buffer.")
+
+#load previously created Q&A questions into a buffer
+fill_buffer_from_dir(UPLOAD_FOLDER)
+
+#run a thread that filles new question into a buffer
 threading.Thread(target=fill_buffer).start()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -62,7 +90,8 @@ def index():
             print("Next")
             session['verdict'] = ""
             session['right_answer'] = ""
-            old_image = session['file_location']
+            old_file_names = session['file_location']
+            print(f"file to delete { old_file_names }")
 
             print(f"DEBUG 1: Current time is {datetime.datetime.now()}")
 
@@ -92,19 +121,20 @@ def index():
             threading.Thread(target=fill_buffer).start()
 
             # Delete the first file
+            old_image = os.path.join(UPLOAD_FOLDER, old_file_names)
             if os.path.exists(old_image):
                 os.remove(old_image)
                 print(f"'{old_image}' has been deleted.")
             else:
                 print(f"'{old_image}' does not exist.")
 
-            old_image = f"QA_{old_image}.JSON"
             # Delete the second file
-            if os.path.exists(old_image):
-                os.remove(old_image)
-                print(f"'{old_image}' has been deleted.")
+            old_description = os.path.join(UPLOAD_FOLDER, f"QA_{ old_file_names }.JSON")
+            if os.path.exists(old_description):
+                os.remove(old_description)
+                print(f"'{old_description}' has been deleted.")
             else:
-                print(f"'{old_image}' does not exist.")
+                print(f"'{old_description}' does not exist.")
         
             return redirect(url_for('index'))
         else:
