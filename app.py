@@ -11,10 +11,12 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # This gets the directory of the current script
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'output')
 PDF_FOLDER = os.path.join(BASE_DIR, 'test')  # Assuming 'output' is a sub-directory of the script's directory
+BASE_FOLDER = os.path.join(BASE_DIR, 'templates')  # Assuming 'output' is a sub-directory of the script's directory
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PDF_FOLDER'] = PDF_FOLDER
+app.config['BASE_FOLDER'] = BASE_FOLDER
 app.config['SECRET_KEY'] = 'tjhsoiw;lks'
 
 # Buffer for question-answer objects
@@ -84,6 +86,7 @@ def index():
     session.setdefault('right_answer', "")
     session.setdefault('pdf_filename', "")
     session.setdefault('page_number', 1)
+    session.setdefault('icon_filename', "history.ico")
 
     if request.method == 'POST':
         if 'next' in request.form:  # Check if the "press" button was clicked
@@ -156,8 +159,9 @@ def index():
     image_url = url_for('uploaded_file', filename=session['file_location'])
     pdf_url = url_for('pdf_file', filename=session['pdf_filename'])
     print("PDF path:" + pdf_url)
+    icon_url = url_for('icon_file', filename=session['icon_filename'])
 
-    return render_template('index.html', image_url=image_url, page_number=session['page_number'], description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False), pdf_url=pdf_url)
+    return render_template('index.html', icon_url=icon_url, image_url=image_url, page_number=session['page_number'], description=session['description'], question=session['question'], right_answer=session['right_answer'], verdict=session['verdict'], fly_in=session.get('fly_in', False), pdf_url=pdf_url)
 
 
 @app.route('/uploads/<filename>')
@@ -168,6 +172,9 @@ def uploaded_file(filename):
 def pdf_file(filename):
     return send_from_directory(app.config['PDF_FOLDER'], filename)
 
+@app.route('/base/<filename>')
+def icon_file(filename):
+    return send_from_directory(app.config['BASE_FOLDER'], filename)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
