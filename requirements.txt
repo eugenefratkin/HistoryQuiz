@@ -1,0 +1,10 @@
+flask
+datetime
+pytesseract
+pdf2image
+llama_index
+pinecone-client
+openai
+requests
+keyring
+uuid
